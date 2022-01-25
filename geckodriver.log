@@ -1,0 +1,13 @@
+1643119892076	geckodriver	INFO	Listening on 127.0.0.1:56286
+1643119895117	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "--remote-debugging-port" "56287" "-no-remote" "-profile" "C:\\Users\\Naglic\\AppData\\Local\\Temp\\rust_mozprofileJpD5ix"
+1643119895506	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new NotFoundError("Could not open the file at C:\\Users\\Naglic\\AppData\\Local\\Temp\\rust_mozprofileJpD5ix\\search.json.mozlz4", (void 0)))
+DevTools listening on ws://localhost:56287/devtools/browser/3d7a6f77-024d-4155-aa1d-da20a9775663
+1643119897957	Marionette	INFO	Listening on port 56293
+1643119898284	RemoteAgent	WARN	TLS certificate errors will be ignored for this session
+JavaScript warning: https://scmedia.itsfogo.com/$-$/31d5a768e2c4428a807409bb99665488.js, line 110: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript warning: https://sports.bwin.de/ClientDist/main-es2015.c18f663b40a838d9e8a1.js, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+console.warn: LoginRecipes: "getRecipes: falling back to a synchronous message for:" "https://sports.bwin.de"
+console.warn: LoginRecipes: "getRecipes: falling back to a synchronous message for:" "https://sports.bwin.de"
+1643119918690	Marionette	INFO	Stopped listening on port 56293
+console.warn: TopSitesFeed: Failed to fetch data from Contile server: NetworkError when attempting to fetch resource.
