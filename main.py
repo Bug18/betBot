@@ -3,14 +3,20 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
 import time
 import pandas as pd
+from openpyxl import load_workbook
 
 
 def read_excel_file(path_to_file: str):
-	return pd.read_excel(path_to_file, index_col=0)
+	return pd.read_excel(path_to_file, sheet_name="bet games", index_col=0)
 
 
 def write_to_file(path_to_file: str, dataframe: pd.DataFrame):
-	dataframe.to_excel(path_to_file)
+	book = load_workbook(path_to_file)
+	writer = pd.ExcelWriter(path_to_file, engine='openpyxl')
+	writer.book = book
+	writer.sheets = dict((ws.title, ws) for ws in book.worksheets)
+	dataframe.to_excel(writer, "all games")
+	writer.save()
 
 
 def get_games(path):
@@ -105,8 +111,9 @@ def main():
 			status = True'''
 
 	games = read_excel_file(path)
+	# print(games)
 
-	status = True
+	# status = True
 
 	while status:
 		bet(games)
