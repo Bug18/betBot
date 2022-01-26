@@ -1,2 +1,9 @@
 # betBot
-Betting bot for bwin.de
+Betting bot for sports.bwin.de
+
+
+
+
+
+
+
