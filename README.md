@@ -1,5 +1,5 @@
 # betBot
-<h3>Betting bot for https://sports.bwin.de</h3>
+<h3>Betting bot for https://sports.bwin.de/en/sports/live/basketball-7</h3>
 
 <h3>Requirements:</h3>
 
