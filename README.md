@@ -19,7 +19,7 @@
 
 - First if you don't have it already, install Firefox and Python (Do not foreget to enable "Add to PATH" option when installing Python)
 
-- Download Geckodriver and unpack it. Take geckodriver.exe and paste it into "C:\Windows" folder
+- Download Geckodriver and unpack it. Take geckodriver.exe and move it into "C:\Windows" folder
 
 - Download this repository and unpack it
 
