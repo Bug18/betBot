@@ -130,7 +130,7 @@ def bet(games: pd.DataFrame, username: str, password: str):
 		if len(handicaps) > 0:
 			handicap = float(handicaps[return_handicap_element_index(team_to_bet_on_index)].text.replace(",", "."))
 			target_handicap = float(str(games["Spread"][current_index_in_book]).replace(",", "."))
-			if handicap <= target_handicap:
+			if handicap >= target_handicap:
 				if score <= int(games["Max score"][current_index_in_book]):
 					# select bet
 					handicaps[return_handicap_element_index(team_to_bet_on_index)].click()
