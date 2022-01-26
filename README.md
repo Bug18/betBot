@@ -30,3 +30,5 @@
 <h3>To select teams to bet on open file 'games.xlsx' and edit 'bet games' sheet.</h3>
 
 <h2>Good luck!</h2>
+
+I'm not personally responisble for any loses while using this bot!
