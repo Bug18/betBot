@@ -70,11 +70,10 @@ def bet(games: pd.DataFrame, username: str, password: str):
 		time.sleep(5)
 
 		# sort games by time
-
 		sort_toggle_xpath = "/html/body/vn-app/vn-dynamic-layout-single-slot[4]/vn-main/main/div/ms-main/ng-scrollbar[1]/div/div/div/div/ms-main-column/div/ms-live/ms-live-event-list/div/ms-grid/ms-grid-header/div/ms-sort-selector/div[2]/div[2]/div[2]"
 		driver.find_element(By.XPATH, sort_toggle_xpath).click()
 
-		time.sleep(1)
+		time.sleep(5)
 
 		# get all currently available games
 		class_game = "participants-pair-game"
@@ -112,6 +111,7 @@ def bet(games: pd.DataFrame, username: str, password: str):
 
 		# go to next game if this one is not on the list to bet on
 		if team_to_bet_on_index == 0:
+			print("Next game...")
 			continue
 
 		# get spread values
@@ -124,45 +124,53 @@ def bet(games: pd.DataFrame, username: str, password: str):
 		password_field_name = "password"
 		class_login_button_2 = "login"
 
-		score = int(driver.find_elements(By.CLASS_NAME, class_score)[team_to_bet_on_index - 1].text.replace("\n", " ").split(" ")[0])
-		handicaps = driver.find_elements(By.CLASS_NAME, class_handicap)
+		score, handicaps = None, None
 
-		if len(handicaps) > 0:
-			handicap = float(handicaps[return_handicap_element_index(team_to_bet_on_index)].text.replace(",", "."))
-			target_handicap = float(str(games["Spread"][current_index_in_book]).replace(",", "."))
-			if handicap >= target_handicap:
-				if score <= int(games["Max score"][current_index_in_book]):
-					# select bet
-					handicaps[return_handicap_element_index(team_to_bet_on_index)].click()
+		try:
+			score = int(driver.find_elements(By.CLASS_NAME, class_score)[team_to_bet_on_index - 1].text.replace("\n", " ").split(" ")[0])
+			handicaps = driver.find_elements(By.CLASS_NAME, class_handicap)
+			state = True
+		except IndexError:
+			print("Data not available")
+			state = False
 
-					# enter bet amount
-					driver.find_element(By.CLASS_NAME, class_bet_size).send_keys(float(games["Bet size"][current_index_in_book]))
+		if state:
+			if len(handicaps) > 0:
+				handicap = float(handicaps[return_handicap_element_index(team_to_bet_on_index)].text.replace(",", "."))
+				target_handicap = float(str(games["Spread"][current_index_in_book]).replace(",", "."))
+				if handicap >= target_handicap:
+					if score <= int(games["Max score"][current_index_in_book]):
+						# select bet
+						handicaps[return_handicap_element_index(team_to_bet_on_index)].click()
 
-					# find login button
-					login_button = driver.find_element(By.CLASS_NAME, class_login_button)
+						# enter bet amount
+						driver.find_element(By.CLASS_NAME, class_bet_size).send_keys(float(games["Bet size"][current_index_in_book]))
 
-					# scroll it into view
-					desired_y = (login_button.size['height'] / 2) + login_button.location['y']
-					current_y = (driver.execute_script('return window.innerHeight') / 2) + driver.execute_script(
-						'return window.pageYOffset')
-					scroll_y_by = desired_y - current_y
-					driver.execute_script("window.scrollBy(0, arguments[0]);", scroll_y_by)
-					time.sleep(1)
+						# find login button
+						login_button = driver.find_element(By.CLASS_NAME, class_login_button)
 
-					# click login button
-					login_button.click()
+						# scroll it into view
+						desired_y = (login_button.size['height'] / 2) + login_button.location['y']
+						current_y = (driver.execute_script('return window.innerHeight') / 2) + driver.execute_script(
+							'return window.pageYOffset')
+						scroll_y_by = desired_y - current_y
+						driver.execute_script("window.scrollBy(0, arguments[0]);", scroll_y_by)
+						time.sleep(1)
 
-					# enter login info
-					driver.find_element(By.NAME, email_field_name).send_keys(username)
-					driver.find_element(By.NAME, password_field_name).send_keys(password)
+						# click login button
+						login_button.click()
 
-					# click to login
-					driver.find_element(By.CLASS_NAME, class_login_button_2).click()
+						# enter login info
+						driver.find_element(By.NAME, email_field_name).send_keys(username)
+						driver.find_element(By.NAME, password_field_name).send_keys(password)
 
-					time.sleep(5)
+						# click to login
+						driver.find_element(By.CLASS_NAME, class_login_button_2).click()
 
-		else:
-			print("Betting locked for this game!")
+						time.sleep(5)
+
+			else:
+				print("Betting locked for this game!")
 
 		# go back to main site
 		driver.get("https://sports.bwin.de/en/sports/live/basketball-7")
