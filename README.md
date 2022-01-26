@@ -7,6 +7,8 @@
 
 - Python 3 (Download from: 'https://www.python.org/downloads/')
 
+- Geckodriver (Download from: 'https://github.com/mozilla/geckodriver/releases', select latest release for you OS and architecture)
+
 <h4>When installing Python enable "Add to PATH" option!</h4>
 
 <h3>To install all necessary packages run (in CMD):</h3>
@@ -16,6 +18,8 @@
 <h3>How to use?</h3>
 
 - First if you don't have it already, install Firefox and Python (Do not foreget to enable "Add to PATH" option when installing Python)
+
+- Download Geckodriver and unpack it. Take geckodriver.exe and paste it into "C:\Windows" folder
 
 - Download this repository and unpack it
 
