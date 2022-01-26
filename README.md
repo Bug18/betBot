@@ -1,6 +1,7 @@
 # betBot
 <h3>Betting bot for https://www.sports.bwin.de
 
+
 Requirements:</h3>
 
 - Firefox (Download from: 'https://www.mozilla.org/firefox/new/')
