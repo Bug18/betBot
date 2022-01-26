@@ -15,7 +15,7 @@ Betting bot for sports.bwin.de
 
 <h3>How to use?</h3>
 
-- First if you don't have it already, install Firefox and Python
+- First if you don't have it already, install Firefox and Python (Do not foreget to enable "Add to PATH" option when installing Python)
 
 - Download this repository and unpack it
 
