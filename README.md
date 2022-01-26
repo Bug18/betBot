@@ -3,6 +3,7 @@ Betting bot for sports.bwin.de
 
 <h3>Requirements:</h3>
 - Firefox (Download from: 'https://www.mozilla.org/firefox/new/')
+
 - Python 3 (Download from: 'https://www.python.org/downloads/')
 
 <h4>When installing Python enable "Add to PATH" option!</h4>
