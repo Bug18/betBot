@@ -96,7 +96,7 @@ def bet(games: pd.DataFrame, username: str, password: str):
 		# print("Game:", all_games[i].text)
 
 		for j in range(len(games.index)):
-			if games["Team1"][j] in all_games[i].text and games["Team2"][j] in all_games[i].text:
+			if games["Team1"][j] in all_games[i].text and games["Team2"][j] in all_games[i].text and int(games["Bet team"][j]) != -1:
 				# print("True")
 				team_to_bet_on_index = int(games["Bet team"][j])
 				current_index_in_book = j
@@ -166,6 +166,9 @@ def bet(games: pd.DataFrame, username: str, password: str):
 
 						# click to login
 						driver.find_element(By.CLASS_NAME, class_login_button_2).click()
+
+						# make sure bot doesn't bet again on the same team
+						games["Bet team"][current_index_in_book] = -1
 
 						time.sleep(5)
 
