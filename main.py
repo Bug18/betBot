@@ -4,6 +4,26 @@ from selenium.webdriver.common.action_chains import ActionChains
 import time
 import pandas as pd
 from openpyxl import load_workbook
+import json
+
+
+def get_login():
+	with open("login.json", "r") as file:
+		try:
+			lines = json.load(file)
+		except:
+			return "-1", "-1"
+		return lines["username"], lines["password"]
+
+
+
+def write_login(u, p):
+	with open("login.json", "w") as file:
+		data = {
+			"username": u,
+			"password": p
+		}
+		file.write(json.dumps(data))
 
 
 def read_excel_file(path_to_file: str):
@@ -60,6 +80,15 @@ def bet(games: pd.DataFrame, username: str, password: str):
 	time.sleep(10)
 
 	driver.find_element(By.ID, "onetrust-accept-btn-handler").click()
+
+	time.sleep(2)
+
+	# close ad
+	try:
+		class_ad = "ui-icon"
+		driver.find_element(By.ID, class_ad).click()
+	except:
+		pass
 
 	# get number of currently live games
 	class_live = "live-icon"
@@ -210,8 +239,11 @@ def main():
 		else:
 			status = True
 
-	usernm = input("Enter app user id or email >> ")
-	passwd = input("Enter app password >> ")
+	u, p = get_login()
+	if u == "-1" and p == "-1":
+		u = input("Enter app user id or email >> ")
+		p = input("Enter app password >> ")
+		write_login(u, p)
 
 	games = read_excel_file(path)
 
@@ -219,7 +251,7 @@ def main():
 
 	while status:
 		print("Starting new cycle...\n")
-		bet(games, usernm, passwd)
+		bet(games, u, p)
 		print("Waiting...\n")
 
 		# waits before next cycle
