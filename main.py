@@ -200,7 +200,7 @@ def bet(games: pd.DataFrame, username: str, password: str):
 							pass
 
 						# make sure bot doesn't bet again on the same team
-						games["Bet team"][current_index_in_book] = -1
+						games.at[current_index_in_book, "Bet team"] = -1
 
 						time.sleep(5)
 
