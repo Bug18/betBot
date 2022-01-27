@@ -57,7 +57,7 @@ def bet(games: pd.DataFrame, username: str, password: str):
 
 	driver.get("https://sports.bwin.de/en/sports/live/basketball-7")
 
-	time.sleep(7)
+	time.sleep(10)
 
 	driver.find_element(By.ID, "onetrust-accept-btn-handler").click()
 
