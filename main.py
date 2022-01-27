@@ -190,11 +190,14 @@ def bet(games: pd.DataFrame, username: str, password: str):
 						login_button.click()
 
 						# enter login info
-						driver.find_element(By.NAME, email_field_name).send_keys(username)
-						driver.find_element(By.NAME, password_field_name).send_keys(password)
+						try:
+							driver.find_element(By.NAME, email_field_name).send_keys(username)
+							driver.find_element(By.NAME, password_field_name).send_keys(password)
 
-						# click to login
-						driver.find_element(By.CLASS_NAME, class_login_button_2).click()
+							# click to login
+							driver.find_element(By.CLASS_NAME, class_login_button_2).click()
+						except:
+							pass
 
 						# make sure bot doesn't bet again on the same team
 						games["Bet team"][current_index_in_book] = -1
