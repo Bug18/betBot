@@ -85,7 +85,7 @@ def bet(games: pd.DataFrame, username: str, password: str):
 
 	# close ad
 	try:
-		class_ad = "ui-icon"
+		class_ad = "ng-star-inserted"
 		driver.find_element(By.ID, class_ad).click()
 	except:
 		pass
