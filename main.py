@@ -167,7 +167,7 @@ def bet(games: pd.DataFrame, username: str, password: str):
 			class_login_button = "betslip-place-button"
 			email_field_name = "username"
 			password_field_name = "password"
-			class_login_button_2 = "login"
+			login_button_xpath = "/html/body/div[6]/div[2]/div/mat-dialog-container/lh-login-dialog/lh-login/div/div/form/fieldset/section/div/button"
 
 			score, handicaps = None, None
 
@@ -206,21 +206,13 @@ def bet(games: pd.DataFrame, username: str, password: str):
 							login_button.click()
 
 							# enter login info
-							try:
-								driver.find_element(By.NAME, email_field_name).send_keys(username)
-								driver.find_element(By.NAME, password_field_name).send_keys(password)
+							driver.find_element(By.NAME, email_field_name).send_keys(username)
+							driver.find_element(By.NAME, password_field_name).send_keys(password)
 
-								# click to login
-								driver.find_element(By.CLASS_NAME, class_login_button_2).click()
+							# click to login
+							driver.find_element(By.XPATH, login_button_xpath).click()
 
-								time.sleep(2)
-
-								class_ok_btn = "btn"
-								ok_btn = driver.find_element(By.CLASS_NAME, class_ok_btn)
-								if ok_btn.text == "OK":
-									ok_btn.click()
-							except:
-								pass
+							time.sleep(3)
 
 							# make sure bot doesn't bet again on the same team
 							games.at[current_index_in_book, "Bet team"] = -1
