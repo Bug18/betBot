@@ -1,6 +1,7 @@
-from selenium.webdriver import Firefox
+from selenium.webdriver import Firefox, FirefoxProfile, FirefoxOptions
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.firefox.options import Options
 import time
 import pandas as pd
 from openpyxl import load_workbook
@@ -71,7 +72,11 @@ def return_handicap_element_index(i):
 def bet(games: pd.DataFrame, username: str, password: str):
 
 	# web driver init start
-	driver = Firefox()
+	# profile = FirefoxProfile()
+	# profile.set_preference("dom.popup_maximum", 0)
+	options = FirefoxOptions()
+	options.set_preference("dom.popup_maximum", 0)
+	driver = Firefox(options=options)
 	actions = ActionChains(driver)
 	driver.maximize_window()
 
@@ -107,8 +112,11 @@ def bet(games: pd.DataFrame, username: str, password: str):
 			time.sleep(5)
 
 			# sort games by time
-			sort_toggle_xpath = "/html/body/vn-app/vn-dynamic-layout-single-slot[4]/vn-main/main/div/ms-main/ng-scrollbar[1]/div/div/div/div/ms-main-column/div/ms-live/ms-live-event-list/div/ms-grid/ms-grid-header/div/ms-sort-selector/div[2]/div[2]/div[2]"
-			driver.find_element(By.XPATH, sort_toggle_xpath).click()
+			try:
+				sort_toggle_xpath = "/html/body/vn-app/vn-dynamic-layout-single-slot[4]/vn-main/main/div/ms-main/ng-scrollbar[1]/div/div/div/div/ms-main-column/div/ms-live/ms-live-event-list/div/ms-grid/ms-grid-header/div/ms-sort-selector/div[2]/div[2]/div[2]"
+				driver.find_element(By.XPATH, sort_toggle_xpath).click()
+			except:
+				pass
 
 			time.sleep(5)
 
