@@ -214,6 +214,10 @@ def bet(games: pd.DataFrame, username: str, password: str):
 
 							time.sleep(3)
 
+							ok_btn = driver.find_element(By.CLASS_NAME, "btn")
+							if ok_btn.text == "OK":
+								ok_btn.press()
+
 							# make sure bot doesn't bet again on the same team
 							games.at[current_index_in_book, "Bet team"] = -1
 
