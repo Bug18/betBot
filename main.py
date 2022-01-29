@@ -82,10 +82,11 @@ def bet(games: pd.DataFrame, username: str, password: str):
 
 	driver.get("https://sports.bwin.de/en/sports/live/basketball-7")
 
+	print("Please manually close popup if it appears on screen. You have 10 seconds to close it!")
 	time.sleep(10)
 
 	# close ad
-	try:
+	'''try:
 		class_ad = "ng-star-inserted"
 		el = driver.find_element(By.ID, class_ad)
 		actions.move_to(el, -5, -5)
@@ -93,15 +94,29 @@ def bet(games: pd.DataFrame, username: str, password: str):
 		actions.perform()
 		time.sleep(1)
 	except:
-		pass
+		pass'''
 
 	# accept all cookies
 	driver.find_element(By.ID, "onetrust-accept-btn-handler").click()
 
 	time.sleep(1)
 
+	# login
+
+
 	while True:
 		print("Starting new cycle...\n")
+
+		# check if login duration popup is up
+		try:
+			login_popup = driver.find_element(By.CLASS_NAME, "login-duration-content-inner")
+			if login_popup:
+				btns = driver.find_elements(By.CLASS_NAME, "btn")
+				for btn in btns:
+					if btn.text == "Continue":
+						btn.click()
+		except:
+			pass
 
 		# get number of currently live games
 		class_live = "live-icon"
@@ -175,7 +190,7 @@ def bet(games: pd.DataFrame, username: str, password: str):
 				score = int(driver.find_elements(By.CLASS_NAME, class_score)[team_to_bet_on_index - 1].text.replace("\n", " ").split(" ")[0])
 				handicaps = driver.find_elements(By.CLASS_NAME, class_handicap)
 				state = True
-			except IndexError:
+			except:
 				print("Data not available")
 				state = False
 
@@ -205,19 +220,20 @@ def bet(games: pd.DataFrame, username: str, password: str):
 							# click login button
 							login_button.click()
 
-							# enter login info
-							driver.find_element(By.NAME, email_field_name).send_keys(username)
-							driver.find_element(By.NAME, password_field_name).send_keys(password)
-
-							# click to login
-							driver.find_element(By.XPATH, login_button_xpath).click()
-
-							time.sleep(3)
-
 							try:
-								ok_btn = driver.find_element(By.CLASS_NAME, "btn")
-								if ok_btn.text == "OK":
-									ok_btn.press()
+								# enter login info
+								driver.find_element(By.NAME, email_field_name).send_keys(username)
+								driver.find_element(By.NAME, password_field_name).send_keys(password)
+
+								# click to login
+								driver.find_element(By.XPATH, login_button_xpath).click()
+
+								time.sleep(3)
+
+								ok_btns = driver.find_elements(By.CLASS_NAME, "btn")
+								for btn in ok_btns:
+									if btn.text == "OK":
+										ok_btn.press()
 							except:
 								pass
 
