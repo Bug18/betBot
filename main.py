@@ -83,7 +83,7 @@ def bet(games: pd.DataFrame, username: str, password: str):
 	driver.get("https://sports.bwin.de/en/sports/live/basketball-7")
 
 	print("Please manually close popup if it appears on screen. You have 10 seconds to close it!")
-	time.sleep(10)
+	time.sleep(20)
 
 	# close ad
 	'''try:
