@@ -101,9 +101,6 @@ def bet(games: pd.DataFrame, username: str, password: str):
 
 	time.sleep(1)
 
-	# login
-
-
 	while True:
 		print("Starting new cycle...\n")
 
@@ -123,8 +120,19 @@ def bet(games: pd.DataFrame, username: str, password: str):
 		live_games_number = len(driver.find_elements(By.CLASS_NAME, class_live))
 
 		# go through all live games and bet if set
+
+		bet_placed = False
+
 		for i in range(live_games_number):
 			time.sleep(5)
+
+			# confirm bet if bet was selected
+			if bet_placed:
+				try:
+					class_bet_button_confirm = "betslip-place-button"
+					driver.find_element(By.CLASS_NAME, class_bet_button_confirm).click()
+				except:
+					pass
 
 			# sort games by time
 			try:
@@ -239,6 +247,7 @@ def bet(games: pd.DataFrame, username: str, password: str):
 
 							# make sure bot doesn't bet again on the same team
 							games.at[current_index_in_book, "Bet team"] = -1
+							bet_placed = True
 
 							time.sleep(2)
 
