@@ -6,6 +6,7 @@ import time
 import pandas as pd
 from openpyxl import load_workbook
 import json
+import random
 
 
 def get_login():
@@ -85,23 +86,15 @@ def bet(games: pd.DataFrame, username: str, password: str):
 	print("Please manually close popup if it appears on screen. You have 10 seconds to close it!")
 	time.sleep(20)
 
-	# close ad
-	'''try:
-		class_ad = "ng-star-inserted"
-		el = driver.find_element(By.ID, class_ad)
-		actions.move_to(el, -5, -5)
-		actions.click()
-		actions.perform()
-		time.sleep(1)
-	except:
-		pass'''
-
 	# accept all cookies
 	driver.find_element(By.ID, "onetrust-accept-btn-handler").click()
 
 	time.sleep(1)
 
-	while True:
+	logged_in = False
+	all_bets_placed = False
+
+	while not all_bets_placed:
 		print("Starting new cycle...\n")
 
 		# check if login duration popup is up
@@ -112,6 +105,15 @@ def bet(games: pd.DataFrame, username: str, password: str):
 				for btn in btns:
 					if btn.text == "Continue":
 						btn.click()
+			time.sleep(2)
+		except:
+			pass
+
+		# sort games by time
+		try:
+			sort_toggle_xpath = "/html/body/vn-app/vn-dynamic-layout-single-slot[4]/vn-main/main/div/ms-main/ng-scrollbar[1]/div/div/div/div/ms-main-column/div/ms-live/ms-live-event-list/div/ms-grid/ms-grid-header/div/ms-sort-selector/div[2]/div[2]/div[2]"
+			driver.find_element(By.XPATH, sort_toggle_xpath).click()
+			time.sleep(1)
 		except:
 			pass
 
@@ -119,71 +121,46 @@ def bet(games: pd.DataFrame, username: str, password: str):
 		class_live = "live-icon"
 		live_games_number = len(driver.find_elements(By.CLASS_NAME, class_live))
 
+		# get all currently available games
+		class_game = "participants-pair-game"
+		all_games = driver.find_elements(By.CLASS_NAME, class_game)
+
 		# go through all live games and bet if set
-
-		bet_placed = False
-
 		for i in range(live_games_number):
-			time.sleep(5)
-
-			# confirm bet if bet was selected
-			if bet_placed:
-				try:
-					class_bet_button_confirm = "betslip-place-button"
-					driver.find_element(By.CLASS_NAME, class_bet_button_confirm).click()
-				except:
-					pass
-
-			# sort games by time
-			try:
-				sort_toggle_xpath = "/html/body/vn-app/vn-dynamic-layout-single-slot[4]/vn-main/main/div/ms-main/ng-scrollbar[1]/div/div/div/div/ms-main-column/div/ms-live/ms-live-event-list/div/ms-grid/ms-grid-header/div/ms-sort-selector/div[2]/div[2]/div[2]"
-				driver.find_element(By.XPATH, sort_toggle_xpath).click()
-			except:
-				pass
-
-			time.sleep(5)
-
-			# get all currently available games
-			class_game = "participants-pair-game"
-			all_games = driver.find_elements(By.CLASS_NAME, class_game)
-
-			# scroll into view
-			desired_y = (all_games[i].size['height'] / 2) + all_games[i].location['y']
-			current_y = (driver.execute_script('return window.innerHeight') / 2) + driver.execute_script(
-				'return window.pageYOffset')
-			scroll_y_by = desired_y - current_y
-			driver.execute_script("window.scrollBy(0, arguments[0]);", scroll_y_by)
-
-			# end scroll
-			time.sleep(1)
 
 			# check if game is on list to bet on
 			team_to_bet_on_index = 0
 			current_index_in_book = -1
 
-			# print("Game:", all_games[i].text)
-
 			for j in range(len(games.index)):
-				if games["Team1"][j] in all_games[i].text and games["Team2"][j] in all_games[i].text and int(games["Bet team"][j]) != -1:
-					# print("True")
+				if games["Team1"][j] in all_games[i].text and games["Team2"][j] in all_games[i].text and int(
+						games["Bet team"][j]) != -1:
+					print(f"Opening game: {games['Team1'][j]} vs {games['Team2'][j]}...")
 					team_to_bet_on_index = int(games["Bet team"][j])
 					current_index_in_book = j
+
+					# scroll into view
+					desired_y = (all_games[i].size['height'] / 2) + all_games[i].location['y']
+					current_y = (driver.execute_script('return window.innerHeight') / 2) + driver.execute_script(
+						'return window.pageYOffset')
+					scroll_y_by = desired_y - current_y
+					driver.execute_script("window.scrollBy(0, arguments[0]);", scroll_y_by)
+					time.sleep(1)
+
 					all_games[i].click()
+
+					# wait to load game page
+					time.sleep(5)
 					break
 				else:
-					# print("False")
 					continue
 
-			# wait to load game page
-			time.sleep(5)
-
 			# go to next game if this one is not on the list to bet on
-			if team_to_bet_on_index == 0:
-				print("Next game...")
+			else:
+				print("Next game... This one is not on a list to bet on")
 				continue
 
 			# get spread values
-
 			class_handicap = "name"
 			class_score = "score-counter"
 			class_bet_size = "stake-input-value"
@@ -199,7 +176,7 @@ def bet(games: pd.DataFrame, username: str, password: str):
 				handicaps = driver.find_elements(By.CLASS_NAME, class_handicap)
 				state = True
 			except:
-				print("Data not available")
+				print("Data not available... Exiting this game...")
 				state = False
 
 			if state:
@@ -228,26 +205,38 @@ def bet(games: pd.DataFrame, username: str, password: str):
 							# click login button
 							login_button.click()
 
+							if not logged_in:
+								try:
+									# enter login info
+									driver.find_element(By.NAME, email_field_name).send_keys(username)
+									driver.find_element(By.NAME, password_field_name).send_keys(password)
+
+									# click to login
+									driver.find_element(By.XPATH, login_button_xpath).click()
+
+									time.sleep(3)
+
+									ok_btns = driver.find_elements(By.CLASS_NAME, "btn")
+									for btn in ok_btns:
+										if btn.text == "OK":
+											ok_btn.press()
+
+									time.sleep(1)
+
+									logged_in = True
+								except:
+									pass
+
+							# confirm bet if bet was selected
 							try:
-								# enter login info
-								driver.find_element(By.NAME, email_field_name).send_keys(username)
-								driver.find_element(By.NAME, password_field_name).send_keys(password)
-
-								# click to login
-								driver.find_element(By.XPATH, login_button_xpath).click()
-
-								time.sleep(3)
-
-								ok_btns = driver.find_elements(By.CLASS_NAME, "btn")
-								for btn in ok_btns:
-									if btn.text == "OK":
-										ok_btn.press()
+								class_bet_button_confirm = "betslip-place-button"
+								driver.find_element(By.CLASS_NAME, class_bet_button_confirm).click()
+								print("Bet placed")
 							except:
 								pass
 
 							# make sure bot doesn't bet again on the same team
 							games.at[current_index_in_book, "Bet team"] = -1
-							bet_placed = True
 
 							time.sleep(2)
 
@@ -256,13 +245,26 @@ def bet(games: pd.DataFrame, username: str, password: str):
 
 			# go back to main site
 			driver.get("https://sports.bwin.de/en/sports/live/basketball-7")
+			time.sleep(5)
 
-		# driver.quit()
+		# check if all wanted bets had been placed
+		all_bets_placed = True
 
-		print("Waiting...\n")
+		for game in games:
+			if game["Bet team"] != -1:
+				all_bets_placed = False
+
+		if all_bets_placed:
+			print("All wanted bets placed! Exiting...")
+			continue
+
+		print("Waiting to next cycle...\n")
 
 		# waits before next cycle
-		time.sleep(180)
+		time.sleep(random.randint(120, 240))
+
+	# close browser and exit script
+	driver.quit()
 
 
 def main():
@@ -305,6 +307,8 @@ def main():
 	print("Bot starting... To stop it just kill entire program :P\n")
 
 	bet(games, u, p)
+
+	exit(0)
 
 
 if __name__ == '__main__':
