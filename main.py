@@ -258,6 +258,10 @@ def bet(games: pd.DataFrame, username: str, password: str, timeout: float):
 							games.at[current_index_in_book, "Bet team"] = -1
 
 							time.sleep(2)
+						else:
+							print("Game result too high...")
+					else:
+						print("Split to small...")
 
 				else:
 					print("Betting locked for this game!")
