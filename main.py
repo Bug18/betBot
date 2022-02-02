@@ -243,7 +243,7 @@ def bet(games: pd.DataFrame, username: str, password: str, timeout: float):
 										ok_btns = driver.find_elements(By.CLASS_NAME, "btn")
 										time.sleep(2)
 										for btn in ok_btns:
-											if btn.innerHTML == "OK":
+											if btn.text == "OK":
 												ok_btn.press()
 												print("Ok pressed after login")
 
