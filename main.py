@@ -278,7 +278,7 @@ def bet(games: pd.DataFrame, username: str, password: str, timeout: float):
 			print("All wanted bets placed! Exiting...")
 			break
 
-		if time.time() < start_time + timeout:
+		if time.time() > start_time + timeout:
 			print("Reached timeout, exiting...")
 			all_bets_placed = True
 			break
