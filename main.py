@@ -197,69 +197,71 @@ def bet(games: pd.DataFrame, username: str, password: str, timeout: float):
 
 			if state:
 				if len(handicaps) > 0:
-					handicap = float(handicaps[return_handicap_element_index(team_to_bet_on_index)].text.replace(",", "."))
-					target_handicap = float(str(games["Spread"][current_index_in_book]).replace(",", "."))
-					if handicap >= target_handicap:
-						if score <= int(games["Max score"][current_index_in_book]):
-							# select bet
-							handicaps[return_handicap_element_index(team_to_bet_on_index)].click()
+					try:
+						handicap = float(handicaps[return_handicap_element_index(team_to_bet_on_index)].text.replace(",", "."))
+						target_handicap = float(str(games["Spread"][current_index_in_book]).replace(",", "."))
+						if handicap >= target_handicap:
+							if score <= int(games["Max score"][current_index_in_book]):
+								# select bet
+								handicaps[return_handicap_element_index(team_to_bet_on_index)].click()
 
-							# enter bet amount
-							driver.find_element(By.CLASS_NAME, class_bet_size).send_keys(float(games["Bet size"][current_index_in_book]))
+								# enter bet amount
+								driver.find_element(By.CLASS_NAME, class_bet_size).send_keys(float(games["Bet size"][current_index_in_book]))
 
-							# find login button
-							login_button = driver.find_element(By.CLASS_NAME, class_login_button)
+								# find login button
+								login_button = driver.find_element(By.CLASS_NAME, class_login_button)
 
-							# scroll it into view
-							desired_y = (login_button.size['height'] / 2) + login_button.location['y']
-							current_y = (driver.execute_script('return window.innerHeight') / 2) + driver.execute_script(
-								'return window.pageYOffset')
-							scroll_y_by = desired_y - current_y
-							driver.execute_script("window.scrollBy(0, arguments[0]);", scroll_y_by)
-							time.sleep(1)
+								# scroll it into view
+								desired_y = (login_button.size['height'] / 2) + login_button.location['y']
+								current_y = (driver.execute_script('return window.innerHeight') / 2) + driver.execute_script(
+									'return window.pageYOffset')
+								scroll_y_by = desired_y - current_y
+								driver.execute_script("window.scrollBy(0, arguments[0]);", scroll_y_by)
+								time.sleep(1)
 
-							# click login button
-							login_button.click()
+								# click login button
+								login_button.click()
 
-							if not logged_in:
+								if not logged_in:
+									try:
+										# enter login info
+										driver.find_element(By.NAME, email_field_name).send_keys(username)
+										driver.find_element(By.NAME, password_field_name).send_keys(password)
+
+										# click to login
+										driver.find_element(By.XPATH, login_button_xpath).click()
+
+										time.sleep(3)
+
+										ok_btns = driver.find_elements(By.CLASS_NAME, "btn")
+										for btn in ok_btns:
+											if btn.text == "OK":
+												ok_btn.press()
+
+										time.sleep(1)
+
+										logged_in = True
+									except:
+										pass
+
+								# confirm bet if bet was selected
 								try:
-									# enter login info
-									driver.find_element(By.NAME, email_field_name).send_keys(username)
-									driver.find_element(By.NAME, password_field_name).send_keys(password)
-
-									# click to login
-									driver.find_element(By.XPATH, login_button_xpath).click()
-
-									time.sleep(3)
-
-									ok_btns = driver.find_elements(By.CLASS_NAME, "btn")
-									for btn in ok_btns:
-										if btn.text == "OK":
-											ok_btn.press()
-
-									time.sleep(1)
-
-									logged_in = True
+									class_bet_button_confirm = "betslip-place-button"
+									driver.find_element(By.CLASS_NAME, class_bet_button_confirm).click()
+									print("Bet placed")
 								except:
 									pass
 
-							# confirm bet if bet was selected
-							try:
-								class_bet_button_confirm = "betslip-place-button"
-								driver.find_element(By.CLASS_NAME, class_bet_button_confirm).click()
-								print("Bet placed")
-							except:
-								pass
+								# make sure bot doesn't bet again on the same team
+								games.at[current_index_in_book, "Bet team"] = -1
 
-							# make sure bot doesn't bet again on the same team
-							games.at[current_index_in_book, "Bet team"] = -1
-
-							time.sleep(2)
+								time.sleep(2)
+							else:
+								print("Game result too high...")
 						else:
-							print("Game result too high...")
-					else:
-						print("Split to small...")
-
+							print("Split to small...")
+					except:
+						print("Betting failed! Betting has probably stopped for this game.")
 				else:
 					print("Betting locked for this game!")
 
