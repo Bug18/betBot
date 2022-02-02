@@ -70,11 +70,21 @@ def return_handicap_element_index(i):
 		return 3
 
 
-def bet(games: pd.DataFrame, username: str, password: str):
+def wait_function():
+	rand_int = random.randint(120, 240)
+
+	for i in range(rand_int):
+		print(f"Sleeping for: {rand_int - i} seconds{i // 5 * '.'}", end="\r")
+		time.sleep(1)
+	print("\n")
+
+
+
+def bet(games: pd.DataFrame, username: str, password: str, timeout: float):
+
+	timeout = timeout * 3600
 
 	# web driver init start
-	# profile = FirefoxProfile()
-	# profile.set_preference("dom.popup_maximum", 0)
 	options = FirefoxOptions()
 	options.set_preference("dom.popup_maximum", 0)
 	driver = Firefox(options=options)
@@ -83,16 +93,21 @@ def bet(games: pd.DataFrame, username: str, password: str):
 
 	driver.get("https://sports.bwin.de/en/sports/live/basketball-7")
 
-	print("Please manually close popup if it appears on screen. You have 10 seconds to close it!")
+	print("Please manually close popup if it appears on screen. You have 20 seconds to close it!")
 	time.sleep(20)
 
 	# accept all cookies
-	driver.find_element(By.ID, "onetrust-accept-btn-handler").click()
+	try:
+		driver.find_element(By.ID, "onetrust-accept-btn-handler").click()
+	except:
+		pass
 
 	time.sleep(1)
 
 	logged_in = False
 	all_bets_placed = False
+
+	start_time = time.time()
 
 	while not all_bets_placed:
 		print("Starting new cycle...\n")
@@ -121,20 +136,24 @@ def bet(games: pd.DataFrame, username: str, password: str):
 		class_live = "live-icon"
 		live_games_number = len(driver.find_elements(By.CLASS_NAME, class_live))
 
-		# get all currently available games
-		class_game = "participants-pair-game"
-		all_games = driver.find_elements(By.CLASS_NAME, class_game)
-
 		# go through all live games and bet if set
 		for i in range(live_games_number):
+
+			# get all currently available games
+			class_game = "participants-pair-game"
+			all_games = driver.find_elements(By.CLASS_NAME, class_game)
+
+			if len(all_games) != live_games_number:
+				print("New game started... Won't be able to open all games in this cycle but will in next!")
+
+			print(f"Trying game: {all_games[i].text}...")
 
 			# check if game is on list to bet on
 			team_to_bet_on_index = 0
 			current_index_in_book = -1
 
 			for j in range(len(games.index)):
-				if games["Team1"][j] in all_games[i].text and games["Team2"][j] in all_games[i].text and int(
-						games["Bet team"][j]) != -1:
+				if games["Team1"][j] in all_games[i].text and games["Team2"][j] in all_games[i].text and int(games["Bet team"][j]) != -1:
 					print(f"Opening game: {games['Team1'][j]} vs {games['Team2'][j]}...")
 					team_to_bet_on_index = int(games["Bet team"][j])
 					current_index_in_book = j
@@ -244,24 +263,31 @@ def bet(games: pd.DataFrame, username: str, password: str):
 					print("Betting locked for this game!")
 
 			# go back to main site
+			print("Back to main site...")
 			driver.get("https://sports.bwin.de/en/sports/live/basketball-7")
 			time.sleep(5)
 
 		# check if all wanted bets had been placed
 		all_bets_placed = True
 
-		for game in games:
-			if game["Bet team"] != -1:
+		for game in games["Bet team"]:
+			if int(game) != -1:
 				all_bets_placed = False
 
 		if all_bets_placed:
 			print("All wanted bets placed! Exiting...")
-			continue
+			break
+
+		if time.time() < start_time + timeout:
+			print("Reached timeout, exiting...")
+			all_bets_placed = True
+			break
 
 		print("Waiting to next cycle...\n")
 
 		# waits before next cycle
-		time.sleep(random.randint(120, 240))
+		# time.sleep(random.randint(120, 240))
+		wait_function()
 
 	# close browser and exit script
 	driver.quit()
@@ -271,10 +297,10 @@ def main():
 	title = r"""
 	__________        __    __  .__                 __________        __   
 	\______   \ _____/  |__/  |_|__| ____    ____   \______   \ _____/  |_ 
-	|    |  _// __ \   __\   __\  |/    \  / ___\   |    |  _//  _ \   __\
-	|    |   \  ___/|  |  |  | |  |   |  \/ /_/  >  |    |   (  <_> )  |  
-	|______  /\___  >__|  |__| |__|___|  /\___  /   |______  /\____/|__|  
-	   	   \/     \/                   \//_____/           \/             
+	 |    |  _// __ \   __\   __\  |/    \  / ___\   |    |  _//  _ \   __\
+	 |    |   \  ___/|  |  |  | |  |   |  \/ /_/  >  |    |   (  <_> )  |  
+	 |______  /\___  >__|  |__| |__|___|  /\___  /   |______  /\____/|__|  
+	 	\/     \/                   \//_____/           \/             
 	""" + "\n" + "source: 'github.com/Bug18/betBot'"
 
 	print(title)
@@ -304,9 +330,10 @@ def main():
 
 	games = read_excel_file(path)
 
-	print("Bot starting... To stop it just kill entire program :P\n")
+	timeout = float(input("Enter timeout in hours >> "))
+	print("Bot starting...\n")
 
-	bet(games, u, p)
+	bet(games, u, p, timeout)
 
 	exit(0)
 
