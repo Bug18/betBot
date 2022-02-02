@@ -143,9 +143,6 @@ def bet(games: pd.DataFrame, username: str, password: str, timeout: float):
 			class_game = "participants-pair-game"
 			all_games = driver.find_elements(By.CLASS_NAME, class_game)
 
-			if len(all_games) != live_games_number:
-				print("New game started... Won't be able to open all games in this cycle but will in next!")
-
 			print(f"Trying game: {all_games[i].text}...")
 
 			# check if game is on list to bet on
