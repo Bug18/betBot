@@ -102,7 +102,7 @@ def bet(games: pd.DataFrame, username: str, password: str, timeout: float):
 	except:
 		pass
 
-	time.sleep(1)
+	time.sleep(2)
 
 	logged_in = False
 	all_bets_placed = False
@@ -205,8 +205,12 @@ def bet(games: pd.DataFrame, username: str, password: str, timeout: float):
 								# select bet
 								handicaps[return_handicap_element_index(team_to_bet_on_index)].click()
 
+								time.sleep(3)
+
 								# enter bet amount
 								driver.find_element(By.CLASS_NAME, class_bet_size).send_keys(float(games["Bet size"][current_index_in_book]))
+
+								time.sleep(3)
 
 								# find login button
 								login_button = driver.find_element(By.CLASS_NAME, class_login_button)
@@ -217,16 +221,19 @@ def bet(games: pd.DataFrame, username: str, password: str, timeout: float):
 									'return window.pageYOffset')
 								scroll_y_by = desired_y - current_y
 								driver.execute_script("window.scrollBy(0, arguments[0]);", scroll_y_by)
-								time.sleep(1)
+								time.sleep(2)
 
 								# click login button
 								login_button.click()
+								time.sleep(5)
 
 								if not logged_in:
 									try:
 										# enter login info
 										driver.find_element(By.NAME, email_field_name).send_keys(username)
+										time.sleep(1)
 										driver.find_element(By.NAME, password_field_name).send_keys(password)
+										time.sleep(1)
 
 										# click to login
 										driver.find_element(By.XPATH, login_button_xpath).click()
@@ -238,7 +245,7 @@ def bet(games: pd.DataFrame, username: str, password: str, timeout: float):
 											if btn.text == "OK":
 												ok_btn.press()
 
-										time.sleep(1)
+										time.sleep(3)
 
 										logged_in = True
 									except:
@@ -278,8 +285,13 @@ def bet(games: pd.DataFrame, username: str, password: str, timeout: float):
 				all_bets_placed = False
 
 		if all_bets_placed:
-			print("All wanted bets placed! Exiting...")
-			break
+			bets = driver.find_elements(By.CLASS_NAME, "sport-pick")
+			if len(bets) == len(games["Bet team"]):
+				print("All wanted bets placed! Exiting...")
+				break
+			else:
+				print("Failed to place valid bets!")
+				all_bets_placed = False
 
 		if time.time() > start_time + timeout:
 			print("Reached timeout, exiting...")
