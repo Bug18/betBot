@@ -136,6 +136,7 @@ def bet(games: pd.DataFrame, username: str, password: str, timeout: float):
 		# get all currently available games
 		class_participants = "participants-pair-game"
 		class_game = "grid-event"
+		class_live = "live-icon"
 		all_games = driver.find_elements(By.CLASS_NAME, class_game)
 
 		# go through all live games and bet if set
