@@ -101,7 +101,7 @@ def bet(games: pd.DataFrame, username: str, password: str, timeout: float):
 
 	# accept all cookies
 	try:
-		driver.wait.until(EC.visibility_of_element_located((By.ID, "onetrust-accept-btn-handler"))).click()
+		driver.wait.until(ec.visibility_of_element_located((By.ID, "onetrust-accept-btn-handler"))).click()
 	except:
 		pass
 
