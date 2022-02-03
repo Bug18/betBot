@@ -194,7 +194,7 @@ def bet(games: pd.DataFrame, username: str, password: str, timeout: float):
 			score, handicaps = None, None
 
 			try:
-				score = int(driver.wait.until(ex.visibility_of_element_located((By.CLASS_NAME, class_score)))[team_to_bet_on_index - 1].text.replace("\n", " ").split(" ")[0])
+				score = int(driver.wait.until(ec.visibility_of_element_located((By.CLASS_NAME, class_score)))[team_to_bet_on_index - 1].text.replace("\n", " ").split(" ")[0])
 				handicaps = driver.find_elements(By.CLASS_NAME, class_handicap)
 				state = True
 			except:
