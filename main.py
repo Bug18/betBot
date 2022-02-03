@@ -208,8 +208,7 @@ def bet(games: pd.DataFrame, username: str, password: str, timeout: float):
 				handicaps = driver.find_elements(By.CLASS_NAME, class_handicap)
 				score = int(driver.find_elements(By.CLASS_NAME, class_score)[team_to_bet_on_index - 1].text.replace("\n", " ").split(" ")[0])
 				state = True
-			except Exception as e:
-				print(f"Exception: {e}")
+			except:
 				print("Data not available... Exiting this game...")
 				state = False
 
