@@ -97,7 +97,7 @@ def bet(games: pd.DataFrame, username: str, password: str, timeout: float):
 	driver.get("https://sports.bwin.de/en/sports/live/basketball-7")
 
 	print("Please manually close popup if it appears on screen. You have 20 seconds to close it!")
-	time.sleep(20)
+	# time.sleep(20)
 
 	# accept all cookies
 	try:
@@ -147,10 +147,20 @@ def bet(games: pd.DataFrame, username: str, password: str, timeout: float):
 			all_games = driver.find_elements(By.CLASS_NAME, class_game)
 
 			current_game = all_games[i].find_element(By.CLASS_NAME, class_participants).text.split("\n")
+			try:
+				current_game.remove("@")
+			except:
+				pass
 
 			print(f"Trying game: {current_game[0]} vs {current_game[1]}...")
 
-			if not all_games[i].find_element(By.CLASS_NAME, class_live):
+			live = None
+			try:
+				live = all_games[i].find_element(By.CLASS_NAME, class_live)
+			except:
+				pass
+
+			if live is None:
 				print("Not live game! Continuing...")
 				continue
 
@@ -159,7 +169,7 @@ def bet(games: pd.DataFrame, username: str, password: str, timeout: float):
 			current_index_in_book = -1
 
 			for j in range(len(games.index)):
-				if games["Team1"][j] == current_game[0] and games["Team2"][j] in current_game[1] and int(games["Bet team"][j]) != -1:
+				if games["Team1"][j] in current_game[0] and games["Team2"][j] in current_game[1] and int(games["Bet team"][j]) != -1:
 					print(f"Opening game: {games['Team1'][j]} vs {games['Team2'][j]}...")
 					team_to_bet_on_index = int(games["Bet team"][j])
 					current_index_in_book = j
@@ -194,10 +204,12 @@ def bet(games: pd.DataFrame, username: str, password: str, timeout: float):
 			score, handicaps = None, None
 
 			try:
-				score = int(driver.wait.until(ec.visibility_of_element_located((By.CLASS_NAME, class_score)))[team_to_bet_on_index - 1].text.replace("\n", " ").split(" ")[0])
+				driver.wait.until(ec.visibility_of_element_located((By.CLASS_NAME, class_handicap)))
 				handicaps = driver.find_elements(By.CLASS_NAME, class_handicap)
+				score = int(driver.find_elements(By.CLASS_NAME, class_score)[team_to_bet_on_index - 1].text.replace("\n", " ").split(" ")[0])
 				state = True
-			except:
+			except Exception as e:
+				print(f"Exception: {e}")
 				print("Data not available... Exiting this game...")
 				state = False
 
@@ -212,7 +224,7 @@ def bet(games: pd.DataFrame, username: str, password: str, timeout: float):
 								handicaps[return_handicap_element_index(team_to_bet_on_index)].click()
 
 								# enter bet amount
-								driver.wait.until(ex.visibility_of_element_located((By.CLASS_NAME, class_bet_size))).send_keys(float(games["Bet size"][current_index_in_book]))
+								driver.wait.until(ec.visibility_of_element_located((By.CLASS_NAME, class_bet_size))).send_keys(float(games["Bet size"][current_index_in_book]))
 
 								time.sleep(3)
 
@@ -229,6 +241,8 @@ def bet(games: pd.DataFrame, username: str, password: str, timeout: float):
 
 								# click login button
 								login_button.click()
+
+								time.sleep(5)
 
 								if not logged_in:
 									try:
