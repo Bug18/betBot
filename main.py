@@ -1,7 +1,9 @@
-from selenium.webdriver import Firefox, FirefoxProfile, FirefoxOptions
+from selenium.webdriver import Firefox, FirefoxOptions
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as ec
 import time
 import pandas as pd
 from openpyxl import load_workbook
@@ -90,6 +92,7 @@ def bet(games: pd.DataFrame, username: str, password: str, timeout: float):
 	driver = Firefox(options=options)
 	actions = ActionChains(driver)
 	driver.maximize_window()
+	driver.wait = WebDriverWait(driver, 20)
 
 	driver.get("https://sports.bwin.de/en/sports/live/basketball-7")
 
@@ -98,11 +101,9 @@ def bet(games: pd.DataFrame, username: str, password: str, timeout: float):
 
 	# accept all cookies
 	try:
-		driver.find_element(By.ID, "onetrust-accept-btn-handler").click()
+		driver.wait.until(EC.visibility_of_element_located((By.ID, "onetrust-accept-btn-handler"))).click()
 	except:
 		pass
-
-	time.sleep(2)
 
 	logged_in = False
 	all_bets_placed = False
@@ -132,25 +133,32 @@ def bet(games: pd.DataFrame, username: str, password: str, timeout: float):
 		except:
 			pass
 
-		# get number of currently live games
-		class_live = "live-icon"
-		live_games_number = len(driver.find_elements(By.CLASS_NAME, class_live))
+		# get all currently available games
+		class_participants = "participants-pair-game"
+		class_game = "grid-event"
+		all_games = driver.find_elements(By.CLASS_NAME, class_game)
 
 		# go through all live games and bet if set
-		for i in range(live_games_number):
+		for i in range(len(all_games)):
 
 			# get all currently available games
-			class_game = "participants-pair-game"
+			class_game = "grid-event"
 			all_games = driver.find_elements(By.CLASS_NAME, class_game)
 
-			print(f"Trying game: {all_games[i].text}...")
+			current_game = all_games[i].find_element(By.CLASS_NAME, class_participants).text.split("\n")
+
+			print(f"Trying game: {current_game[0]} vs {current_game[1]}...")
+
+			if not all_games[i].find_element(By.CLASS_NAME, class_live):
+				print("Not live game! Continuing...")
+				continue
 
 			# check if game is on list to bet on
 			team_to_bet_on_index = 0
 			current_index_in_book = -1
 
 			for j in range(len(games.index)):
-				if games["Team1"][j] in all_games[i].text and games["Team2"][j] in all_games[i].text and int(games["Bet team"][j]) != -1:
+				if games["Team1"][j] == current_game[0] and games["Team2"][j] in current_game[1] and int(games["Bet team"][j]) != -1:
 					print(f"Opening game: {games['Team1'][j]} vs {games['Team2'][j]}...")
 					team_to_bet_on_index = int(games["Bet team"][j])
 					current_index_in_book = j
@@ -164,9 +172,6 @@ def bet(games: pd.DataFrame, username: str, password: str, timeout: float):
 					time.sleep(1)
 
 					all_games[i].click()
-
-					# wait to load game page
-					time.sleep(5)
 					break
 				else:
 					continue
@@ -188,7 +193,7 @@ def bet(games: pd.DataFrame, username: str, password: str, timeout: float):
 			score, handicaps = None, None
 
 			try:
-				score = int(driver.find_elements(By.CLASS_NAME, class_score)[team_to_bet_on_index - 1].text.replace("\n", " ").split(" ")[0])
+				score = int(driver.wait.until(ex.visibility_of_element_located((By.CLASS_NAME, class_score)))[team_to_bet_on_index - 1].text.replace("\n", " ").split(" ")[0])
 				handicaps = driver.find_elements(By.CLASS_NAME, class_handicap)
 				state = True
 			except:
@@ -205,10 +210,8 @@ def bet(games: pd.DataFrame, username: str, password: str, timeout: float):
 								# select bet
 								handicaps[return_handicap_element_index(team_to_bet_on_index)].click()
 
-								time.sleep(3)
-
 								# enter bet amount
-								driver.find_element(By.CLASS_NAME, class_bet_size).send_keys(float(games["Bet size"][current_index_in_book]))
+								driver.wait.until(ex.visibility_of_element_located((By.CLASS_NAME, class_bet_size))).send_keys(float(games["Bet size"][current_index_in_book]))
 
 								time.sleep(3)
 
@@ -225,29 +228,22 @@ def bet(games: pd.DataFrame, username: str, password: str, timeout: float):
 
 								# click login button
 								login_button.click()
-								time.sleep(5)
 
 								if not logged_in:
 									try:
 										# enter login info
-										driver.find_element(By.NAME, email_field_name).send_keys(username)
+										driver.wait.until(
+											ec.visibility_of_element_located((By.NAME, email_field_name))).send_keys(username)
 										time.sleep(1)
 										driver.find_element(By.NAME, password_field_name).send_keys(password)
-										time.sleep(1)
+										time.sleep(2)
 
 										# click to login
 										driver.find_element(By.XPATH, login_button_xpath).click()
 
-										time.sleep(3)
+										# time.sleep(10)
 
-										ok_btns = driver.find_elements(By.CLASS_NAME, "btn")
-										time.sleep(2)
-										for btn in ok_btns:
-											if btn.text == "OK":
-												ok_btn.press()
-												print("Ok pressed after login")
-
-										time.sleep(3)
+										driver.wait.until(ec.visibility_of_element_located((By.CLASS_NAME, "btn"))).click()
 
 										logged_in = True
 									except:
@@ -256,7 +252,7 @@ def bet(games: pd.DataFrame, username: str, password: str, timeout: float):
 								# confirm bet if bet was selected
 								try:
 									class_bet_button_confirm = "betslip-place-button"
-									driver.find_element(By.CLASS_NAME, class_bet_button_confirm).click()
+									driver.wait.until(ec.visibility_of_element_located((By.CLASS_NAME, class_bet_button_confirm))).click()
 									print("Bet placed")
 								except:
 									pass
