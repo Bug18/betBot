@@ -138,13 +138,17 @@ def bet(games: pd.DataFrame, username: str, password: str, timeout: float):
 		class_game = "grid-event"
 		class_live = "live-icon"
 		all_games = driver.find_elements(By.CLASS_NAME, class_game)
+		games_length = len(all_games)
 
 		# go through all live games and bet if set
-		for i in range(len(all_games)):
+		for i in range(games_length):
 
 			# get all currently available games
 			class_game = "grid-event"
 			all_games = driver.find_elements(By.CLASS_NAME, class_game)
+
+			if len(all_games) < games_length:
+				break
 
 			current_game = all_games[i].find_element(By.CLASS_NAME, class_participants).text.split("\n")
 			try:
