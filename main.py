@@ -92,7 +92,7 @@ def bet(games: pd.DataFrame, username: str, password: str, timeout: float):
 	driver = Firefox(options=options)
 	actions = ActionChains(driver)
 	driver.maximize_window()
-	driver.wait = WebDriverWait(driver, 20)
+	driver.wait = WebDriverWait(driver, 30)
 
 	driver.get("https://sports.bwin.de/en/sports/live/basketball-7")
 
